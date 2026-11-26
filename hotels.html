@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f3ec">
+<title>会议酒店选择方案</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f5f3ec;
+    --card: #fcfbf7;
+    --ink: #242d24;
+    --muted: #5c655a;
+    --green: #263b30;
+    --line: #dfdfd3;
+    --serif: "Songti SC", "Noto Serif CJK SC", SimSun, serif;
+    --sans: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.6 var(--sans); }
+  h1, h2, h3, p, figure { margin: 0; }
+  a { color: inherit; }
+  img { display: block; width: 100%; }
+  button { font: inherit; color: inherit; }
+  .shell { width: min(calc(100% - 72px), 1152px); margin-inline: auto; }
+  .masthead { display: flex; align-items: center; justify-content: space-between; min-height: 77px; gap: 12px; }
+  .site-title { display: flex; gap: 12px; align-items: center; font-weight: 700; letter-spacing: .07em; white-space: nowrap; }
+  .mark { width: 11px; height: 11px; background: #7b6144; border-radius: 2px; transform: rotate(45deg); }
+  .masthead nav { display: flex; gap: clamp(15px, 3vw, 35px); color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .masthead nav a { text-decoration: none; }
+  .masthead nav a:hover { text-decoration: underline; }
+  .hero { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; padding: clamp(25px, 4vw, 48px); border-radius: 16px; background: var(--green); color: #fffdf7; }
+  .hero h1 { font: 700 clamp(30px, 4.6vw, 57px)/1.2 var(--serif); letter-spacing: .025em; }
+  .hero-basis { color: #e2e7dc; }
+  .hero-basis strong { color: #fffdf7; margin-right: 8px; white-space: nowrap; }
+  .hero-link { display: inline-flex; flex: none; align-items: center; gap: 14px; border: 1px solid #abb6a5; border-radius: 100px; padding: 9px 16px; text-decoration: none; font-size: 13px; }
+  .hero-link:hover { background: #fff2; }
+  .hotel-overview { margin: 16px 0 0; padding: 0; border: 1px solid var(--line); border-radius: 13px; background: var(--card); }
+  .hotel-overview > div { display: grid; grid-template-columns: minmax(175px, 22%) minmax(0, 1fr) max-content; align-items: baseline; gap: 5px 18px; padding: 13px clamp(14px, 2.5vw, 26px); }
+  .hotel-overview > div + div { border-top: 1px solid var(--line); }
+  .hotel-overview dt { font-weight: 700; }
+  .hotel-overview dd { margin: 0; color: var(--muted); }
+  .hotel-overview .overview-total { display: flex; align-items: baseline; gap: 7px; color: var(--green); white-space: nowrap; }
+  .overview-total .total-label { color: var(--muted); font-size: 12px; }
+  .overview-total .amount { font-size: 17px; font-variant-numeric: tabular-nums; }
+  .hotel-overview a { text-decoration-color: #889484; text-underline-offset: 4px; }
+  section { scroll-margin-top: 22px; }
+  .section { margin-top: 48px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+  h2 { font: 700 clamp(29px, 3.4vw, 38px)/1.25 var(--serif); letter-spacing: .04em; }
+  .section-meta { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .quote { border-radius: 13px; border: 1px solid var(--line); background: var(--card); overflow-x: auto; }
+  table { width: 100%; min-width: 480px; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; text-align: left; }
+  thead { background: #e9ebe1; color: #394739; }
+  th, td { padding: 13px clamp(12px, 2.3vw, 27px); vertical-align: top; }
+  thead th { font-weight: 650; font-size: 13px; }
+  thead th:first-child { width: 15%; }
+  tbody th { font-weight: 650; }
+  thead th:first-child, tbody th { position: sticky; left: 0; }
+  thead th:first-child { background: #e9ebe1; }
+  tbody th { background: var(--card); }
+  tbody tr { border-top: 1px solid var(--line); }
+  tbody th, tbody td { padding-block: 13px; }
+  thead a { text-decoration-color: #889484; text-underline-offset: 4px; }
+  .amount { white-space: nowrap; font-weight: 750; font-size: 19px; }
+  .unit { font-size: 13px; font-weight: 500; }
+  .detail { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .quote-hint { display: none; color: var(--muted); font-size: 12px; margin-top: 7px; }
+  .hotel-prices { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin: 0 0 10px; }
+  .hotel-prices > div { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+  .hotel-prices dt { color: var(--muted); font-size: 13px; }
+  .hotel-prices dd { margin: 4px 0 0; }
+  .hotel-prices .amount { font-size: clamp(18px, 2.2vw, 25px); }
+  .hotel-prices .hotel-total { background: var(--green); border-color: var(--green); color: #fffdf7; }
+  .hotel-total dt { color: #e2e7dc; }
+  .estimate { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .estimate strong { margin-right: 8px; color: var(--green); }
+  .hotel-head { padding-top: 27px; border-top: 1px solid var(--line); }
+  .notes { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: -4px 0 22px; color: var(--muted); font-size: 14px; }
+  .notes p { display: flex; align-items: baseline; gap: 9px; }
+  .notes strong { color: var(--green); font-size: 13px; white-space: nowrap; }
+  .media-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .media-grid-wide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .media-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .media-thumb { display: block; width: 100%; aspect-ratio: 16 / 9; background: #222821; }
+  button.media-thumb { border: 0; padding: 0; cursor: zoom-in; position: relative; }
+  button.media-thumb img { height: 100%; object-fit: cover; }
+  button.media-thumb:focus-visible { outline-offset: -5px; outline-color: white; }
+  button.media-thumb span { display: grid; place-items: center; width: 32px; height: 32px; position: absolute; right: 12px; bottom: 12px; border-radius: 50%; color: #fff; background: #202820dc; font-size: 19px; line-height: 1; }
+  video.media-thumb { object-fit: contain; }
+  figcaption { padding: 9px 14px 11px; font-weight: 640; font-size: 13px; }
+  .menu-card { display: flex; flex-direction: column; justify-content: center; padding: clamp(12px, 2.2vw, 24px); background: #e9ebe1; font-size: 13px; line-height: 1.35; }
+  .menu-card h3 { font: 700 18px/1.2 var(--serif); color: var(--green); }
+  .menu-card ul { padding: 0; margin: 5px 0 0; list-style: none; }
+  .menu-card li { padding: 2px 0; }
+  .menu-card li + li { border-top: 1px solid #d5dbce; }
+  #novotel .media-grid figure { align-self: start; }
+  main { padding-bottom: 56px; }
+  dialog { width: min(94vw, 1152px); max-width: none; max-height: calc(100% - 24px); padding: 0; border: 0; border-radius: 12px; background: #19221a; color: #fff; }
+  dialog::backdrop { background: #101510df; }
+  dialog img { width: 100%; max-height: 77dvh; object-fit: contain; }
+  .dialog-bar { padding: 9px 14px; display: flex; gap: 15px; justify-content: space-between; align-items: center; }
+  .dialog-bar button { color: #fff; background: #ffffff15; border: 1px solid #ffffff4f; border-radius: 7px; padding: 4px 12px; cursor: pointer; }
+  :focus-visible { outline: 2px solid #966d42; outline-offset: 4px; }
+  @media (max-width: 999px) {
+    .hotel-prices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .shell { width: calc(100% - 34px); }
+    .masthead { min-height: 62px; }
+    .site-title { letter-spacing: 0; font-size: 14px; gap: 8px; }
+    .mark { width: 8px; height: 8px; }
+    .masthead nav { gap: 13px; }
+    .hero { border-radius: 13px; }
+    .hero-basis { font-size: 14px; }
+    .hotel-overview > div { grid-template-columns: minmax(135px, 31%) 1fr; }
+    .hotel-overview .overview-total { grid-column: 2; }
+    .section { margin-top: 34px; }
+    .section-head { margin-bottom: 13px; }
+    .quote th, .quote td { padding-inline: 10px; }
+    thead th:first-child { width: 72px; }
+    .amount { font-size: 16px; }
+    .media-grid-wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    main { padding-bottom: 36px; }
+  }
+  @media (max-width: 520px) {
+    .media-grid { grid-template-columns: 1fr; gap: 12px; }
+    .hotel-overview > div { grid-template-columns: 1fr; gap: 2px; }
+    .hotel-overview dd { font-size: 14px; }
+    .hotel-overview .overview-total { grid-column: 1; margin-top: 3px; }
+    .hotel-prices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .notes { gap: 6px; flex-direction: column; padding-top: 2px; }
+    .quote th, .quote td { padding-inline: 7px; }
+    .amount { font-size: 14px; }
+    .unit { font-size: 12px; }
+  }
+  @media (max-width: 516px) { .quote-hint { display: block; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<header class="shell masthead">
+  <p class="site-title"><span class="mark" aria-hidden="true"></span>会议酒店选择方案</p>
+  <nav aria-label="页面导航"><a href="#quotes">报价对比</a><a href="#xinghe">酒店详情</a></nav>
+</header>
+<main class="shell">
+  <div class="hero">
+    <h1>会议酒店选择方案</h1>
+    <p class="hero-basis"><strong>估算依据</strong>客房 25 间 × 2 晚，午餐和茶歇各 80 人，晚餐 8 桌（每桌 10 人），会议场地 1 天。</p>
+    <a class="hero-link" href="#quotes">查看报价 <span aria-hidden="true">↓</span></a>
+  </div>
+  <dl class="hotel-overview" aria-label="候选酒店及特点">
+    <div>
+      <dt><a href="#xinghe">星河壹号酒店</a></dt>
+      <dd>徽派古风庭院，2026 年新开。午餐报价较低，为商务简餐，可自助或盒餐。会议结束后撤去会议桌，换成圆桌，晚餐在同一会议厅举行。</dd>
+      <dd class="overview-total"><span class="total-label">整体报价</span><span class="amount"><span class="unit">约</span> 50,800 <span class="unit">元</span></span></dd>
+    </div>
+    <div>
+      <dt><a href="#radisson">西郊庄园丽笙酒店</a></dt>
+      <dd>欧式风格，装修较华丽，会议厅配有较大的 LED 屏。晚餐另安排在酒店中餐厅。</dd>
+      <dd class="overview-total"><span class="total-label">整体报价</span><span class="amount">90,800 <span class="unit">元</span></span></dd>
+    </div>
+    <div>
+      <dt><a href="#also">上海 ALSO 酒店</a></dt>
+      <dd>美的集团旗下，工业风设计，2025 年开业，装修较新。</dd>
+      <dd class="overview-total"><span class="total-label">整体报价</span><span class="amount">80,040 <span class="unit">元</span></span></dd>
+    </div>
+    <div>
+      <dt><a href="#novotel">虹桥机场诺富特酒店</a></dt>
+      <dd>现代简约风格，整体配置较均衡。会议厅 LED 屏尺寸适中，餐饮表现中等，综合报价为四家中第二低。</dd>
+      <dd class="overview-total"><span class="total-label">整体报价</span><span class="amount">58,180 <span class="unit">元</span></span></dd>
+    </div>
+  </dl>
+  <section class="section" id="quotes" aria-labelledby="quotes-title">
+    <div class="section-head">
+      <h2 id="quotes-title">报价对比</h2>
+      <p class="section-meta">人民币</p>
+    </div>
+    <div class="quote" role="region" aria-labelledby="quotes-title" tabindex="0">
+      <table aria-labelledby="quotes-title">
+        <thead>
+          <tr>
+            <th scope="col">项目</th>
+            <th scope="col"><a href="#xinghe">星河壹号酒店</a></th>
+            <th scope="col"><a href="#radisson">西郊庄园丽笙酒店</a></th>
+            <th scope="col"><a href="#also">上海 ALSO 酒店</a></th>
+            <th scope="col"><a href="#novotel">虹桥机场诺富特酒店</a></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">客房</th>
+            <td><span class="amount">298 <span class="unit">元</span></span><span class="detail">含早餐</span></td>
+            <td><span class="amount">600 <span class="unit">元</span></span><span class="detail">含双早</span></td>
+            <td><span class="amount">600 <span class="unit">元</span></span><span class="detail">含双早</span></td>
+            <td><span class="amount">430 <span class="unit">元</span></span><span class="detail">含双早</span></td>
+          </tr>
+          <tr>
+            <th scope="row">午餐</th>
+            <td><span class="amount">50 <span class="unit">元/人</span></span><span class="detail">（商务简餐，可自助或盒餐）</span></td>
+            <td><span class="amount">150 <span class="unit">元/人</span></span><span class="detail">（自助餐）</span></td>
+            <td><span class="amount">130 <span class="unit">元/人</span></span><span class="detail">（自助餐）</span></td>
+            <td><span class="amount">88 <span class="unit">元/人</span></span><span class="detail">（自助餐）</span></td>
+          </tr>
+          <tr>
+            <th scope="row">晚餐<span class="detail">中等标准</span></th>
+            <td><span class="amount"><span class="unit">约</span> 2,000 <span class="unit">元/桌</span></span></td>
+            <td><span class="amount">3,000 <span class="unit">元/桌</span></span></td>
+            <td><span class="amount">2,500 <span class="unit">元/桌</span></span></td>
+            <td><span class="amount">2,000 <span class="unit">元/桌</span></span></td>
+          </tr>
+          <tr>
+            <th scope="row">会议场地<span class="detail">（含 LED 屏）</span></th>
+            <td><span class="amount">9,500 <span class="unit">元/天</span></span></td>
+            <td><span class="amount">20,000 <span class="unit">元/天</span></span></td>
+            <td><span class="amount">15,000 <span class="unit">元/天</span></span></td>
+            <td><span class="amount">9,000 <span class="unit">元/天</span></span></td>
+          </tr>
+          <tr>
+            <th scope="row">茶歇</th>
+            <td><span class="amount">80 <span class="unit">元/人</span></span><span class="detail">窑烤面包、现做咖啡</span></td>
+            <td><span class="amount">60 <span class="unit">元/人</span></span></td>
+            <td><span class="amount">58 <span class="unit">元/人</span></span></td>
+            <td><span class="amount">58 <span class="unit">元/人</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="quote-hint">左右滑动可查看完整报价</p>
+  </section>
+  <section class="section" id="xinghe" aria-labelledby="xinghe-title">
+    <div class="section-head hotel-head">
+      <h2 id="xinghe-title">星河壹号酒店</h2>
+      <p class="section-meta">5 张照片 · 1 段视频</p>
+    </div>
+    <dl class="hotel-prices" aria-label="星河壹号酒店报价">
+      <div><dt>客房</dt><dd><span class="amount">298 <span class="unit">元</span></span><span class="detail">含早餐</span></dd></div>
+      <div><dt>午餐</dt><dd><span class="amount">50 <span class="unit">元/人</span></span><span class="detail">（商务简餐，可自助或盒餐）</span></dd></div>
+      <div><dt>晚餐</dt><dd><span class="amount"><span class="unit">约</span> 2,000 <span class="unit">元/桌</span></span></dd></div>
+      <div><dt>会议场地<span class="detail">（含 LED 屏）</span></dt><dd><span class="amount">9,500 <span class="unit">元/天</span></span></dd></div>
+      <div><dt>茶歇</dt><dd><span class="amount">80 <span class="unit">元/人</span></span><span class="detail">窑烤面包、现做咖啡</span></dd></div>
+      <div class="hotel-total"><dt>整体报价</dt><dd><span class="amount"><span class="unit">约</span> 50,800 <span class="unit">元</span></span></dd></div>
+    </dl>
+    <div class="estimate">
+      <p><strong>计算明细</strong>客房 14,900 元 ＋ 午餐 4,000 元 ＋ 晚餐约 16,000 元 ＋ 会议场地 9,500 元 ＋ 茶歇 6,400 元</p>
+    </div>
+    <div class="notes">
+      <p><strong>客房升级</strong><span>有重要领导入住时，可免费升级 1 间 VIP 套房。</span></p>
+    </div>
+    <div class="media-grid">
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="星河壹号酒店 · 多功能厅舞台正面" aria-label="放大多功能厅舞台正面照片">
+          <img src="./assets/9025ec078e8be89b.jpg" alt="多功能厅舞台正面与宴会摆台" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>多功能厅 · 舞台正面</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="客房 · 双床" aria-label="放大双床客房照片">
+          <img src="./assets/5e3d611c42e369b2.jpg" alt="有两张床、电视与窗边座椅的客房" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>客房 · 双床</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="多功能厅 · 侧面全景" aria-label="放大多功能厅侧面全景照片">
+          <img src="./assets/677bcd1907cd33ff.jpg" alt="从侧面拍摄的多功能厅全景" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>多功能厅 · 侧面全景</figcaption>
+      </figure>
+      <figure class="media-card">
+        <video class="media-thumb" controls playsinline preload="metadata" aria-label="星河壹号酒店实拍视频">
+          <source src="./assets/f26bf992092a01fa.mp4" type="video/mp4">
+          当前浏览器无法播放此视频。
+        </video>
+        <figcaption>星河壹号酒店 · 实拍视频</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="星河壹号酒店 · 茶歇" aria-label="放大星河壹号酒店茶歇照片">
+          <img src="./assets/1bb201e4a72e7797.jpg" alt="星河壹号酒店茶歇的窑烤面包与咖啡" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>茶歇 · 窑烤面包与现做咖啡</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="星河壹号酒店 · 面包烤窑" aria-label="放大星河壹号酒店面包烤窑照片">
+          <img src="./assets/d7be207323455bda.jpg" alt="星河壹号酒店用于窑烤面包的砖砌烤窑" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>茶歇 · 面包烤窑</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="section" id="radisson" aria-labelledby="radisson-title">
+    <div class="section-head hotel-head">
+      <h2 id="radisson-title">西郊庄园丽笙酒店</h2>
+      <p class="section-meta">6 张照片</p>
+    </div>
+    <dl class="hotel-prices" aria-label="西郊庄园丽笙酒店报价">
+      <div><dt>客房</dt><dd><span class="amount">600 <span class="unit">元</span></span><span class="detail">含双早</span></dd></div>
+      <div><dt>午餐</dt><dd><span class="amount">150 <span class="unit">元/人</span></span><span class="detail">（自助餐）</span></dd></div>
+      <div><dt>晚餐</dt><dd><span class="amount">3,000 <span class="unit">元/桌</span></span></dd></div>
+      <div><dt>会议场地<span class="detail">（含 LED 屏）</span></dt><dd><span class="amount">20,000 <span class="unit">元/天</span></span></dd></div>
+      <div><dt>茶歇</dt><dd><span class="amount">60 <span class="unit">元/人</span></span></dd></div>
+      <div class="hotel-total"><dt>整体报价</dt><dd><span class="amount">90,800 <span class="unit">元</span></span></dd></div>
+    </dl>
+    <div class="estimate">
+      <p><strong>计算明细</strong>客房 30,000 元 ＋ 午餐 12,000 元 ＋ 晚餐 24,000 元 ＋ 会议场地 20,000 元 ＋ 茶歇 4,800 元</p>
+    </div>
+    <div class="media-grid media-grid-wide">
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="会议厅 · LED 屏与座席" aria-label="放大会议厅 · LED 屏与座席照片">
+          <img src="./assets/34321f3be226043a.jpg" alt="会议厅舞台、LED 屏与成排桌椅" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>会议厅 · LED 屏与座席</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="客房 · 双床" aria-label="放大客房 · 双床照片">
+          <img src="./assets/01b40b4ec7b8c19b.jpg" alt="西郊庄园丽笙酒店双床客房与拱形窗" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>客房 · 双床</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="会议厅 · 侧面座席" aria-label="放大会议厅 · 侧面座席照片">
+          <img src="./assets/2ad91f95adc07810.jpg" alt="从侧面拍摄的会议厅和会议桌椅" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>会议厅 · 侧面座席</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="餐厅" aria-label="放大餐厅照片">
+          <img src="./assets/828fcc43e2679adf.jpg" alt="带落地窗与吊灯的酒店餐厅" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>餐厅</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="会议厅 · 穹顶全景" aria-label="放大会议厅 · 穹顶全景照片">
+          <img src="./assets/10cd6927290e6887.jpg" alt="带穹顶吊灯与成排座席的会议厅" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>会议厅 · 穹顶全景</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="西郊庄园丽笙酒店 · 茶歇" aria-label="放大西郊庄园丽笙酒店茶歇照片">
+          <img src="./assets/d797fade37e67053.jpg" alt="西郊庄园丽笙酒店茶歇台上的三明治、水果和点心" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>茶歇</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="section" id="also" aria-labelledby="also-title">
+    <div class="section-head hotel-head">
+      <h2 id="also-title">上海 ALSO 酒店</h2>
+      <p class="section-meta">4 张照片</p>
+    </div>
+    <dl class="hotel-prices" aria-label="上海 ALSO 酒店报价">
+      <div><dt>客房</dt><dd><span class="amount">600 <span class="unit">元</span></span><span class="detail">含双早</span></dd></div>
+      <div><dt>午餐</dt><dd><span class="amount">130 <span class="unit">元/人</span></span><span class="detail">（自助餐）</span></dd></div>
+      <div><dt>晚餐</dt><dd><span class="amount">2,500 <span class="unit">元/桌</span></span></dd></div>
+      <div><dt>会议场地<span class="detail">（含 LED 屏）</span></dt><dd><span class="amount">15,000 <span class="unit">元/天</span></span></dd></div>
+      <div><dt>茶歇</dt><dd><span class="amount">58 <span class="unit">元/人</span></span></dd></div>
+      <div class="hotel-total"><dt>整体报价</dt><dd><span class="amount">80,040 <span class="unit">元</span></span></dd></div>
+    </dl>
+    <div class="estimate">
+      <p><strong>计算明细</strong>客房 30,000 元 ＋ 午餐 10,400 元 ＋ 晚餐 20,000 元 ＋ 会议场地 15,000 元 ＋ 茶歇 4,640 元</p>
+    </div>
+    <div class="media-grid">
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="上海 ALSO 酒店 · 客房双床" aria-label="放大上海 ALSO 酒店双床客房照片">
+          <img src="./assets/f1775dec5d6c0817.jpg" alt="上海 ALSO 酒店双床客房与窗边沙发" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>客房 · 双床</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="上海 ALSO 酒店 · 会议厅" aria-label="放大上海 ALSO 酒店会议厅照片">
+          <img src="./assets/b355c52d97651f8e.jpg" alt="带 LED 屏和落地窗的会议厅" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>会议厅 · LED 屏</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="上海 ALSO 酒店 · 餐厅" aria-label="放大上海 ALSO 酒店餐厅照片">
+          <img src="./assets/7f5b611c3826999b.jpg" alt="上海 ALSO 酒店餐厅的用餐区与餐台" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>餐厅</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="上海 ALSO 酒店 · 茶歇" aria-label="放大上海 ALSO 酒店茶歇照片">
+          <img src="./assets/d624eebb5c2c76e2.jpg" alt="上海 ALSO 酒店茶歇台上的甜点、水果和饮品" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>茶歇</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="section" id="novotel" aria-labelledby="novotel-title">
+    <div class="section-head hotel-head">
+      <h2 id="novotel-title">虹桥机场诺富特酒店</h2>
+      <p class="section-meta">3 张照片 · 1 份菜单</p>
+    </div>
+    <dl class="hotel-prices" aria-label="虹桥机场诺富特酒店报价">
+      <div><dt>客房</dt><dd><span class="amount">430 <span class="unit">元</span></span><span class="detail">含双早</span></dd></div>
+      <div><dt>午餐</dt><dd><span class="amount">88 <span class="unit">元/人</span></span><span class="detail">（自助餐）</span></dd></div>
+      <div><dt>晚餐</dt><dd><span class="amount">2,000 <span class="unit">元/桌</span></span></dd></div>
+      <div><dt>会议场地<span class="detail">（含 LED 屏）</span></dt><dd><span class="amount">9,000 <span class="unit">元/天</span></span></dd></div>
+      <div><dt>茶歇</dt><dd><span class="amount">58 <span class="unit">元/人</span></span></dd></div>
+      <div class="hotel-total"><dt>整体报价</dt><dd><span class="amount">58,180 <span class="unit">元</span></span></dd></div>
+    </dl>
+    <div class="estimate">
+      <p><strong>计算明细</strong>客房 21,500 元 ＋ 午餐 7,040 元 ＋ 晚餐 16,000 元 ＋ 会议场地 9,000 元 ＋ 茶歇 4,640 元</p>
+    </div>
+    <div class="media-grid">
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="虹桥机场诺富特酒店 · 双床客房" aria-label="放大虹桥机场诺富特酒店双床客房照片">
+          <img src="./assets/48c9c69b476a88a9.jpg" alt="虹桥机场诺富特酒店的双床客房及壁挂电视" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>客房 · 双床</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="虹桥机场诺富特酒店 · 会议厅" aria-label="放大虹桥机场诺富特酒店会议厅照片">
+          <img src="./assets/1febb6ffbb87efb1.jpg" alt="虹桥机场诺富特酒店会议厅的 LED 屏及蓝色桌布会议座席" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>会议厅 · LED 屏</figcaption>
+      </figure>
+      <figure class="media-card">
+        <button type="button" class="media-thumb" data-caption="虹桥机场诺富特酒店 · 餐厅" aria-label="放大虹桥机场诺富特酒店餐厅照片">
+          <img src="./assets/22d2bd8ef90238e7.jpg" alt="虹桥机场诺富特酒店餐厅的用餐区与餐台" loading="lazy">
+          <span aria-hidden="true">+</span>
+        </button>
+        <figcaption>餐厅</figcaption>
+      </figure>
+      <article class="media-card menu-card" aria-labelledby="novotel-menu-title">
+        <h3 id="novotel-menu-title">茶歇菜单</h3>
+        <ul>
+          <li>红丝绒瑞士卷</li>
+          <li>巧克力慕斯</li>
+          <li>冰皮大福</li>
+          <li>西瓜、哈密瓜</li>
+          <li>咖啡、红茶、橙汁</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</main>
+<dialog id="photo-dialog" aria-labelledby="photo-caption">
+  <div class="dialog-bar">
+    <p id="photo-caption"></p>
+    <form method="dialog"><button autofocus>关闭</button></form>
+  </div>
+  <img alt="">
+</dialog>
+<script>
+  const photoDialog = document.querySelector('#photo-dialog');
+  const enlargedPhoto = photoDialog.querySelector('img');
+  const photoCaption = document.querySelector('#photo-caption');
+
+  for (const button of document.querySelectorAll('[data-caption]')) {
+    button.addEventListener('click', () => {
+      const thumbnail = button.querySelector('img');
+      enlargedPhoto.src = thumbnail.src;
+      enlargedPhoto.alt = thumbnail.alt;
+      photoCaption.textContent = button.dataset.caption;
+      photoDialog.showModal();
+    });
+  }
+
+  photoDialog.addEventListener('click', (event) => {
+    if (event.target === photoDialog) photoDialog.close();
+  });
+</script>
+</body>
+</html>
